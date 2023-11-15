@@ -19,7 +19,7 @@ public class ThirdPartiesAPIService implements ThirdPartiesAPIInterface {
     RestTemplate restTemplate=new RestTemplate();
     @Override
     public ResponseEntity<String> validateEmailId(String emailId) {
-        String apiKey="3b22e6f6ecee4b95b6f35907b68f4926";
+        String apiKey=***************************;
         String emailValidationAPI="https://emailvalidation.abstractapi.com/v1/?api_key="+apiKey+"&email="+emailId;
         String jsonResponse=restTemplate.getForObject(emailValidationAPI,String.class);
         String isDeliverable = new JSONObject(jsonResponse).get("deliverability").toString();
