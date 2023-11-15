@@ -38,7 +38,7 @@ public class ThirdPartiesAPIService implements ThirdPartiesAPIInterface {
     @Override
     public ResponseEntity<Map<String, List<String>>> fetchLocationDetailsByPostalCode(String postalCode) {
         Map<String, List<String>> locationMap=new HashMap<>();
-        String userName="gangs";                //API requires an username..
+        String userName=********;                //API requires an username..
         String fetchGeoLocationAPI="http://api.geonames.org/postalCodeLookupJSON?postalcode="+postalCode+"&country=IN&username="+userName;
         String jsonResponse=restTemplate.getForObject(fetchGeoLocationAPI, String.class);
         JSONArray postalCodes = new JSONObject(jsonResponse).getJSONArray("postalcodes");
