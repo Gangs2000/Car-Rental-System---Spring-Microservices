@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html xmlns:th="https://thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>    
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>    
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>        
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <title>Reports and Analytics</title>
+</head>
+<body style="background-color:ghostwhite;">         
+    <div class="container-fluid">                
+        <div class="row">
+            <!--Top Navigation Bar-->
+            <div class="container">
+                <div class="row" id="titleBar"></div>
+            </div>
+        </div>     
+        <div class="row">
+            <!--Side Nav Bar-->            
+            <div class="col-sm-3" id="sideBar"></div>                
+            <!--Content Page-->
+            <div class="col-sm">
+                <div class="container">                    
+                    <div>
+                        <div class="col-sm-4" style="margin-top:4%; width:100%; background-color:white; padding:3%;">      
+                            <div class="row">
+                                <div class="col-sm-9">
+                                    <h3 style="color:red;">Reports and Analytics</h3><br>                                                      
+                                </div>
+                                <div class="col-sm-3">
+                                    <select class="form-select" id="data-reports">                                        
+                                        <option value="1">Owned and Rented Cars</option>
+                                        <option value="2">Revenue graph - Current Year</option>
+                                        <option value="3">Revenue graph - Past 8 years</option>
+                                        <option value="4">Revenue graph - Each car</option>
+                                        <option value="5">Rented Counts - Each Car</option>
+                                        <option value="6">Top Rated Cars</option>
+                                        <option value="7">Transaction graph</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <br>
+                            <div id="graph-container" style="height: 550px; margin: 0 auto;"></div>
+                        </div>                    
+                    </div>
+                </div>                
+            </div>            
+        </div>
+    </div>    
+</body>
+</html>
+<script th:inline="javascript">
+    //Load Title Bar
+    $(function(){
+        $("#titleBar").load("titleBar");
+    });        
+    //Load Side Bar
+    $(function(){
+        $("#sideBar").load("sideBar");
+    });
+
+    //Triggers first graph when document page is loaded..
+    $(document).ready(function(){
+        ownedAndRentedGraph();
+    });
+
+    $("#data-reports").on('change', function(){ 
+        let selectedOption=parseInt($("#data-reports").val());
+        switch(selectedOption){
+            case 1 : ownedAndRentedGraph(); break;
+            case 2 : revenueGraphCurrentYear(); break;
+            case 3 : revenueGraphOverall(); break;
+            case 4 : revenueDetailsPerCar(); break;
+            case 5 : revenueRentedCarPerCar(); break;
+            case 6 : ratingGraph(); break;
+            case 7 : transactionReportGraph(); break;
+        }
+    });
+
+    function ownedAndRentedGraph(){
+        //Owned and rented cars graph will be shown    
+        var xLabel = ["Owned Cars", "Rented Cars"];        
+        var yLabel = /*[[${graph1}]]*/ "";                
+        var maxCount=Math.max(...yLabel);
+        $(function () {                        
+            Highcharts.chart('graph-container', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: "Owned and Rented Cars Data"
+                },
+                subtitle: {
+                    text: 'Owned and Rented Cars count'
+                },
+                xAxis: {
+                    categories: xLabel,
+                    crosshair: true
+                },
+                yAxis: {
+                    min: 0,
+                    max: maxCount+5,
+                    title: {
+                        text: 'Number of Cars'
+                    }
+                },
+                tooltip: {
+                    headerFormat: '<span style="font-size:20px">{point.key}</span><table>',
+                    pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                        '<td style="padding:0; color:red"><b>{point.y:.1f}</b></td></tr>',
+                    footerFormat: '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                plotOptions: {
+                    column: {
+                        pointPadding: 0.2,
+                        borderWidth: 0
+                    }
+                },
+                series: [{
+                    name: 'Cars',
+                    data: yLabel
+                }]
+            });
+        });
+    }
+
+    function revenueGraphCurrentYear(){
+        //Revenue graph - current year will be shown        
+        let revenues = /*[[${graph2}]]*/ "";        
+        Highcharts.chart('graph-container', {
+            chart: {
+                type: 'pie',
+                options3d: {
+                    enabled: true,
+                    alpha: 45
+                }
+            },
+            title: {
+                text: 'Revenue report for the current year',
+                align: 'left'
+            },
+            subtitle: {
+                text: 'Revenue per month',
+                align: 'left'
+            },
+            plotOptions: {
+                pie: {
+                    innerSize: 100,
+                    depth: 45
+                }
+            },
+            series:[{name: 'Revenue',data: revenues}]
+        });
+    }
+
+    function revenueGraphOverall(){
+        //Revenue graph - overall will be shown              
+        var revenues = /*[[${graph3}]]*/ "";
+        Highcharts.chart('graph-container', {
+            chart: {
+                type: 'pie',
+                options3d: {
+                    enabled: true,
+                    alpha: 45,
+                    beta: 0
+                }
+            },
+            title: {
+                text: 'OverAll Revenue report for past 8 years',
+                align: 'left'
+            },
+            subtitle: {
+                text: 'Last 8 years data',
+                align: 'left'
+            },
+            accessibility: {
+                point: {
+                    valueSuffix: '%'
+                }
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>Rs.{point.y:.1f}</b><br> Percentage : <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    depth: 35,
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.name}'
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Total Revenue',
+                data: revenues
+            }]
+        });
+    }
+
+    function revenueDetailsPerCar(){
+        //Revenue report per car
+        var xLabel = /*[[${graph4X}]]*/ "";
+        var yLabel = /*[[${graph4Y}]]*/ "";
+        const chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'graph-container',
+                type: 'column',
+                options3d: {
+                    enabled: true,
+                    alpha: 0,
+                    beta: 0,
+                    depth: 20,
+                    viewDistance: 25
+                }
+            },
+            xAxis: {
+                categories: xLabel
+            },
+            yAxis: {
+                title: {
+                    enabled: false
+                }
+            },
+            tooltip: {
+                headerFormat: 'Car Number : <b>{point.key}</b><br>',
+                pointFormat: 'Revenue : <b>Rs.{point.y}</b>'
+            },
+            title: {
+                text: 'Revenue report from each Owned Car',
+                align: 'left'
+            },
+            subtitle: {
+                text: 'Revenue collected from each car',
+                align: 'left'
+            },
+            legend: {
+                enabled: false
+            },
+            plotOptions: {
+                column: {
+                    depth: 25
+                }
+            },
+            series: [{
+                data: yLabel,
+                colorByPoint: true
+            }]
+        });
+    }
+
+    function revenueRentedCarPerCar(){
+        //Rented Count report per car
+        var xLabel = /*[[${graph5X}]]*/ "";
+        var yLabel = /*[[${graph5Y}]]*/ "";
+        const chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'graph-container',
+                type: 'column',
+                options3d: {
+                    enabled: true,
+                    alpha: 0,
+                    beta: 0,
+                    depth: 20,
+                    viewDistance: 25
+                }
+            },
+            xAxis: {
+                categories: xLabel
+            },
+            yAxis: {
+                title: {
+                    enabled: false
+                }
+            },
+            tooltip: {
+                headerFormat: 'Car Number : <b>{point.key}</b><br>',
+                pointFormat: 'No of Times Rented : <b>{point.y}</b> times'
+            },
+            title: {
+                text: 'Rented count report per car',
+                align: 'left'
+            },
+            subtitle: {
+                text: 'No.of Times rented',
+                align: 'left'
+            },
+            legend: {
+                enabled: false
+            },
+            plotOptions: {
+                column: {
+                    depth: 25
+                }
+            },
+            series: [{
+                data: yLabel,
+                colorByPoint: true
+            }]
+        });
+    }
+
+    function ratingGraph(){
+        //Rating report per car        
+        var rating = /*[[${graph6}]]*/ "";
+        Highcharts.chart('graph-container', {
+            chart: {
+                type: 'pie',
+                options3d: {
+                    enabled: true,
+                    alpha: 45,
+                    beta: 0
+                }
+            },
+            title: {
+                text: 'Rating report per car',
+                align: 'left'
+            },
+            subtitle: {
+                text: 'Number of people liked this car (In %)',
+                align: 'left'
+            },
+            accessibility: {
+                point: {
+                    valueSuffix: '%'
+                }
+            },
+            tooltip: {
+                pointFormat: '{series.name} : <b>{point.percentage:.1f}%</b> of the people rated for this car'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    depth: 35,
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.name}'
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Report',
+                data: rating
+            }]
+        });
+    }
+
+    function transactionReportGraph(){
+        //Transaction report graph    
+        var transaction = /*[[${graph7}]]*/ "";
+        Highcharts.chart('graph-container', {
+            chart: {
+                type: 'pie',
+                options3d: {
+                    enabled: true,
+                    alpha: 45,
+                    beta: 0
+                }
+            },
+            title: {
+                text: 'Transaction report',
+                align: 'left'
+            },
+            subtitle: {
+                text: 'Transaction record ratio (In %)',
+                align: 'left'
+            },
+            accessibility: {
+                point: {
+                    valueSuffix: '%'
+                }
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.y:.1f}</b> times<br>Transaction Ratio is <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    depth: 35,
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.name}'
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Total Transaction',
+                data: transaction
+            }]
+        });
+    }
+</script>

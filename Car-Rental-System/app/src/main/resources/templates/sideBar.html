@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="https://thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>    
+    <style>
+        .nav-link:hover{
+            color:white;
+            font-weight:bold;            
+            padding:8px;
+        }        
+        #sideBar .sidebarLink{
+            color:black;
+            font-size:16px;
+            text-decoration:none;
+        }
+        #sideBar .sidebarLink:hover{            
+            color:black;                 
+            font-weight:bold;        
+        }        
+    </style>
+</head>
+<body>
+    <!--Side Bar Options-->
+    <div class="vertical-nav bg-white" style="height:52rem; width:90%;">
+        <p style="background-color: black; text-align: center; color:white; padding:20px;"><i class="bi bi-list-ul"></i>&nbsp;&nbsp;<strong>Explore Options</strong></p><br>
+        <center><p><strong><i class="bi bi-geo-alt-fill"></i>&nbsp;&nbsp;<span th:text="'Location - '+${session.sessionLocality}" style="color:red"/></strong><br></p></center><br>
+        <p style="color: blue; margin-left:10%"><b>Your Car Inventory</b></p>
+        <ul class="nav flex-column bg-white mb-8" style="padding:10px; margin-left:14%;">
+            <li class="mb-4"><i class="bi bi-stars"></i>&nbsp;&nbsp;<a href="/car-rental-system/app/fetchOwnedCars" class="sidebarLink font-italic">Owned Cars</a></li>
+            <li class="mb-4"><i class="bi bi-stars"></i>&nbsp;&nbsp;<a href="/car-rental-system/app/registerNewCar" class="sidebarLink font-italic">Register New Car</a></li>      
+            <li class="mb-4"><i class="bi bi-stars"></i>&nbsp;&nbsp;<a href="/car-rental-system/app/bookedCars" class="sidebarLink font-italic">Cars Rented By Others</a></li>      
+            <li class="mb-4"><i class="bi bi-stars"></i>&nbsp;&nbsp;<a href="/car-rental-system/app/dataReports" class="sidebarLink font-italic">Reports and Analytics</a></li>
+        </ul>
+        <p style="color: blue; margin-left:10%"><b>Rent Others Car</b></p>
+        <ul class="nav flex-column bg-white mb-8" style="padding:10px; margin-left:14%;">            
+            <li class="mb-4"><i class="bi bi-stars"></i>&nbsp;&nbsp;<a href="/car-rental-system/app/fetchAllCars" class="sidebarLink font-italic">All Cars</a></li>
+            <li class="mb-4"><i class="bi bi-stars"></i>&nbsp;&nbsp;<a href="/car-rental-system/app/fetchTrips" class="sidebarLink font-italic">Trip Status</a></li>            
+            <li class="mb-4"><i class="bi bi-stars"></i>&nbsp;&nbsp;<a href="/car-rental-system/app/fetchTransactions" class="sidebarLink font-italic">Transactions</a></li>            
+        </ul>
+    </div>         
+</body>
+</html>

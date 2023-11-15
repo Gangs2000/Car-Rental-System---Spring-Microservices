@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html xmlns:th="https://thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>    
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>    
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>        
+    <title>All Cars</title>    
+    <style>
+        .card:hover{
+            box-shadow: 5px 5px 5px 5px #888888;
+            background-color:black;            
+            color:white;
+        }
+        .modal-fullWidth .modal-dialog {
+            max-width: 100%;
+            width: 100%;
+            margin:0;            
+        }        
+    </style>
+</head>
+<body style="background-color:ghostwhite;">         
+    <div class="container-fluid">
+        <!--Toast box-->
+        <div class="position-fixed bottom-0 start-0 p-3" style="z-index: 11;">
+            <div id="info" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true">
+                <div class="toast-header">                                    
+                    <strong class="me-auto">Contact Info</strong>                                
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body" style="background-color:black; color:white">
+                    <b>Email Id : </b><span id="contact-email"></span><br>
+                    <b>Mobile Number : </b><span id="contact-mobile"></span><br>
+                    <b>Address : </b><span id="contact-address"></span><br>                     
+                    <b>Pincode : </b><span id="contact-pincode"></span><br>                       
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <!--Top Navigation Bar-->
+            <div class="container">
+                <div class="row" id="titleBar"></div>
+            </div>
+        </div>     
+        <div class="row">
+            <!--Side Nav Bar-->            
+            <div class="col-sm-3" id="sideBar"></div>                
+            <!--Content Page-->
+            <div class="col-sm" style="overflow: auto;">                           
+                <div th:if="${listSize}==0">
+                    <div style="margin-top:5%; padding:5%;">         
+                        <div class="row">
+                            <div class="col-sm">
+                                <center>
+                                    <p style="font-size:24px; margin-top:6%; font-weight:bold;">No Cars have been filtered to be shown</p>
+                                    <i class="bi bi-emoji-frown" style="font-size:100px"></i><br><br>                                    
+                                </center>
+                            </div>
+                        </div>
+                    </div>
+                </div>                
+                <div th:if="${listSize}!=0">
+                    <div style="background-color: white; margin-top: 3%; padding:4%; overflow: auto;">  
+                        <div class="row">
+                            <div class="col-sm"><h3 style="position: fixed; color:red;">All Cars</h3></div>                            
+                            <div class="col-sm"><button class="btn btn-primary" style="position:fixed; margin-left:25%;" data-bs-toggle="modal" data-bs-target="#filterTray"><i class="bi bi-funnel-fill"></i>&nbsp;&nbsp;<b>Filter Tray</b></button></div>
+                        </div>
+                        <br><br>
+                        <table class="table" style="border:none;">
+                            <tbody>
+                                <tr style="border: none;">                            
+                                    <td class="column" th:each="car : ${carsList}" scope="row" style="display:revert;">
+                                        <div class="card" style="width: 30rem; height:35rem;">                                    
+                                            <div class="card-body"  style="overflow:auto; margin-left:5%;">
+                                                <p class="card-text">
+                                                    <div class="row">
+                                                        <div class="col-sm-9"><h5 th:text="'Car Number : '+${car._id}"/></div>
+                                                        <div class="col-sm-3"><a class="btn btn-warning" style="border-radius:50%;" th:href="'/car-rental-system/app/fetch/contact-info/email/'+${car.ownedBy}"><i class="bi bi-telephone-fill"></i></a></div>
+                                                    </div>
+                                                    <br>
+                                                    <p th:inline="text"><b>Rating :</b>&nbsp;&nbsp;<i style="color:blue" class="bi bi-star-fill"></i>&nbsp;&nbsp;<span style="color:red; font-weight:bold;">[[${car.carRating.get(2)}]]</span> / 5</p>
+                                                    <input type="hidden" class="field0" th:value="${car.carRating.get(2)}">
+                                                    <p th:inline="text" class="field1" th:value="${car.carModel}"><b>Model :</b> [[${car.carModel}]]</p>
+                                                    <p th:inline="text" class="field2" th:value="${car.manufacturer}"><b>Manufacturer :</b> [[${car.manufacturer}]]</p>
+                                                    <p th:inline="text" class="field3" th:value="${car.year}"><b>Model Year :</b> [[${car.year}]]</p>
+                                                    <p th:inline="text" class="field4" th:value="${car.pricePerDay}"><b>Price ( Per Day ) :</b> Rs.[[${car.pricePerDay}]]</p>
+                                                    <p th:inline="text" class="field5" th:value="${car.locality}"><b>Locality :</b> [[${car.locality}]] </p>
+                                                    <p th:inline="text" class="field6" th:value="${car.district}"><b>District :</b> [[${car.district}]] </p>
+                                                    <p th:inline="text" class="field7" th:value="${car.state}"><b>State :</b> [[${car.state}]]</p>
+                                                    <p th:inline="text" class="field8" th:value="${car.pinCode}"><b>Pincode :</b> [[${car.pinCode}]]</p>                                                
+                                                </p>
+                                            </div>
+                                            <div class="card-footer" style="padding:2%;">
+                                                <div class="row" style="margin-left:1%;">
+                                                    <div class="col-sm">
+                                                        <a class="btn btn-primary" th:href="'/car-rental-system/app/fetch/carId/'+${car._id}"><i class="bi bi-calendar-event-fill"></i>&nbsp;&nbsp;<b>Book Trip</b></a>
+                                                    </div>
+                                                    <div class="col-sm">
+                                                        <a class="btn btn-success" th:href="'/car-rental-system/app/fetch-reviews/carId/'+${car._id}"><i class="bi bi-chat-right-text-fill"></i>&nbsp;&nbsp;<b>Reviews</b></a>
+                                                    </div>
+                                                    <div class="col-sm">
+                                                        <a class="btn btn-danger" th:href="'/car-rental-system/app/fetch-slots/carId/'+${car._id}"><i class="bi bi-table"></i>&nbsp;&nbsp;<b>Get Slots</b></a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>                                           
+                                    </td>                            
+                                </tr>
+                            </tbody>
+                        </table>
+                        <!--This block will appear if filteration retuns 0 search results-->                                        
+                        <div class="col-sm" id="filter-result" style="display:none; margin-left:5%; margin-top:12%; height:28rem;">
+                            <center>
+                                <p style="font-size:24px; margin-top:6%; font-weight:bold;">No Cars have been filtered to be shown</p>
+                                <i class="bi bi-emoji-frown" style="font-size:100px"></i><br><br>                                    
+                            </center>
+                        </div>                                                                    
+                    </div>
+                </div>
+            </div>            
+        </div>
+    </div>    
+
+    <!--Modal Box to Book car-->
+    <div class="modal fade" id="bookTrip" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" style="margin-left:33%;">
+            <div class="modal-content" style="width:140%; padding:5%">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="availability">Book Trip</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">   
+                    <form id="bookTripForm">
+                        <div class="row">
+                            <div class="col-sm">
+                                <label class="form-label"><b>Car Number :</b></label>                                
+                                <input type="text" style="text-transform: uppercase;" name="carId" id="carId" placeholder="TN XX X XXXX" class="form-control" readonly>                                            
+                            </div> 
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm">
+                                <label class="form-label"><b>Choose Trip Start Date :</b></label>                                
+                                <input type="date" id="tripStartDate" name="tripStartDate" class="form-control" autocomplete="off" required>                            
+                            </div>                                    
+                            <div class="col-sm">
+                                <label class="form-label"><b>Choose Trip End Date :</b></label>                                
+                                <input type="date" id="tripEndDate" name="tripEndDate" class="form-control" autocomplete="off" required>
+                            </div>                                    
+                        </div><br>                                                            
+                        <button type="button" class="btn btn-primary" style="width:100%; font-weight:bold;" onclick="bookTrip()"><i class="bi bi-calendar-week-fill"></i>&nbsp;&nbsp;Book Trip</button>
+                    </form>
+                </div>                
+            </div>
+        </div>
+    </div>    
+
+    <!--Modal Box to Choose choices-->
+    <div class="modal fade" id="choices" tabindex="-1" aria-labelledby="choices" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="choices">Hurray!!</h5>                    
+                </div>
+                <div class="modal-body">  
+                    Trip can be booked for the given date, Want to proceed?<br><br>    
+                    <input type="hidden" id="carId">
+                    <input type="hidden" id="tripStartDate">
+                    <input type="hidden" id="tripEndDate">
+                    <button type="button" class="btn btn-primary" onclick="proceedBooking()"><i class="bi bi-check-circle-fill"></i>&nbsp;&nbsp;<b>Proceed to book</b></button>                
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-x-circle-fill"></i>&nbsp;&nbsp;<b>Abort</b></button>
+                </div>
+            </div>
+        </div>
+    </div>     
+
+    <!--Modal box to display all reviews for the selected car-->
+    <div class="modal fade" id="reviews" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="max-height:70%; overflow:auto;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reviews</h5>     
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>               
+                </div>
+                <div class="modal-body">  
+                    <div id="review">
+                        <!--Content will be appeared here dynamically-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+
+    <!--Modal box to display all trip slots for the selected car-->
+    <div class="modal fade" id="tripSlots" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="choices">Trip Slots</h5>     
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>               
+                </div>
+                <div class="modal-body">  
+                    <table class="table table-striped">
+                        <thead class="thead" style="background-color:black; color:white">
+                          <tr>
+                            <th scope="col"><i class="bi bi-calendar2-range-fill"></i>&nbsp;&nbsp;Trip Start Date</th>
+                            <th scope="col"><i class="bi bi-calendar2-range-fill"></i>&nbsp;&nbsp;Trip End Date</th>                            
+                          </tr>
+                        </thead>
+                        <tbody><!--Data will be appended dynamically--></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>    
+
+    <!--Filteration Tray-->
+    <div class="modal modal-fullWidth" id="filterTray">
+        <div class="modal-dialog">
+            <div class="modal-content">                  
+                <div class="modal-header">                    
+                    <span style="font-size:20px; color:blue; font-weight:bold;">Filteration</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm">
+                            <label class="form-label"><b>Car Model :</b></label>                                
+                            <input type="text" style="text-transform:capitalize;" placeholder="Search for Model" class="form-control" id="model" autocomplete="off">
+                        </div>
+                        <div class="col-sm">
+                            <label class="form-label"><b>Manufacturer :</b></label>                                
+                            <input type="text" style="text-transform:capitalize;" placeholder="Search for Manufacturer" class="form-control" id="manufacturer" autocomplete="off">
+                        </div>
+                        <div class="col-sm">
+                            <label class="form-label"><b>Year :</b></label>                                
+                            <input type="number" step="1" min="1900" max="3000" placeholder="Search for Model Year" class="form-control" id="year" autocomplete="off">
+                        </div>
+                        <div class="col-sm">
+                            <label class="form-label"><b>Price :</b></label>                                
+                            <div class="input-group">
+                                <input type="number" step="0.1" min="1" placeholder="Search for Price" class="form-control" id="price" autocomplete="off">
+                                <select class="form-select" id="option">
+                                    <option value="0">Above</option>
+                                    <option value="1">Equal</option>
+                                    <option value="2">Below</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                            <label class="form-label"><b>Locality :</b></label>                                
+                            <input type="text" style="text-transform:capitalize;" placeholder="Search for Locality" class="form-control" id="locality" autocomplete="off">
+                        </div>
+                        <div class="col-sm">
+                            <label class="form-label"><b>District :</b></label>                                
+                            <input type="text" style="text-transform:capitalize;" placeholder="Search for District" class="form-control" id="district" autocomplete="off">
+                        </div>
+                        <div class="col-sm">
+                            <label class="form-label"><b>State :</b></label>                                
+                            <input type="text" style="text-transform:capitalize;" placeholder="Search for State" class="form-control" id="state" autocomplete="off">
+                        </div>
+                        <div class="col-sm">
+                            <label class="form-label"><b>Pincode :</b></label>                                
+                            <input type="text" placeholder="Search for pincode" maxlength="6" class="form-control" id="pincode" autocomplete="off">
+                        </div>
+                        <div class="col-sm" style="margin-top:2rem;"><button class="btn btn-danger" style="width:90%" onclick="reset()"><b>Reset</b></button></div>
+                    </div>
+                    <br><hr><br>
+                    <div class="row">                        
+                        <div class="col-sm" style="max-width:15%;">
+                            <label class="form-label"><b>Filter only :</b></label>    
+                            <input type="hidden" th:value="${session.sessionLocality}" id="sessionLocality">
+                            <input type="hidden" th:value="${session.sessionDistrict}" id="sessionDistrict">
+                            <input type="hidden" th:value="${session.sessionState}" id="sessionState">
+                            <input type="hidden" th:value="${session.sessionPinCode}" id="sessionPinCode">
+                            <select class="form-select" id="filter-only">
+                                <option value="0" selected>Select Option</option>
+                                <option value="1">Current Locality</option>
+                                <option value="2">Current District</option>
+                                <option value="3">Current State</option>
+                                <option value="4">Current PinCode</option>
+                            </select>
+                        </div>
+                        <div class="col-sm" style="max-width:20%;">
+                            <label class="form-label"><b>Min and Max Price :</b></label>                                
+                            <div class="input-group">
+                                <input type="number" step="0.1" min="1" placeholder="Enter Min price" class="form-control" id="min-price" autocomplete="off">
+                                <input type="number" step="0.1" min="1" placeholder="Enter Max price" class="form-control" id="max-price" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-sm" style="max-width:20%;">
+                            <label class="form-label"><b>Rating :</b></label>                                
+                            <div class="input-group">
+                                <select class="form-select" id="rating-value">
+                                    <option value="-1">Select Option</option>
+                                    <option value="0">0 star</option>
+                                    <option value="1">1 star</option>
+                                    <option value="2">2 stars</option>
+                                    <option value="3">3 stars</option>
+                                    <option value="4">4 stars</option>
+                                    <option value="5">5 stars</option>
+                                </select>
+                                <select class="form-select" id="rating-option">
+                                    <option value="0">Above</option>
+                                    <option value="1">Equal</option>
+                                    <option value="2">Below</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>            
+        </div>        
+    </div>      
+</body>
+</html>
+<script>    
+    //Load Title Bar
+    $(function(){
+        $("#titleBar").load("titleBar");
+    });        
+    //Load Side Bar
+    $(function(){
+        $("#sideBar").load("sideBar");
+    });
+
+    //Reset filter box
+    const reset=()=>{
+        $("#model, #manufacturer, #year, #price, #locality, #district, #state, #pincode, #min-price, #max-price").val('');
+        $("#rating-value").val(-1);
+        const cards=document.querySelectorAll(".column");
+        cards.forEach(card => {            
+            card.style.display = "revert";
+            $("#filter-result").css('display','none');
+        })
+    }
+
+    //Filter only option
+    $("#filter-only").on('change', function(){
+        let selectedOption=parseInt(document.getElementById("filter-only").value);
+        let needToSearch="", field="";
+        switch(selectedOption){
+            case 1 : needToSearch=document.getElementById("sessionLocality").value; field=".field5"; break;
+            case 2 : needToSearch=document.getElementById("sessionDistrict").value; field=".field6"; break;
+            case 3 : needToSearch=document.getElementById("sessionState").value; field=".field7"; break;
+            case 4 : needToSearch=document.getElementById("sessionPinCode").value; field=".field8"; break;
+        }
+        const cards=document.querySelectorAll(".column");
+        let totalCardsCount=0, hiddenCardsCount=0;        
+        cards.forEach(card=>{
+            totalCardsCount++;            
+            let searchEquals=card.querySelector(field).getAttribute("value");
+            if(searchEquals===needToSearch)
+                card.style.display="revert";
+            else{
+                hiddenCardsCount++;
+                card.style.display="none";
+            }
+        })
+        if(totalCardsCount==hiddenCardsCount)
+            $("#filter-result").css('display', 'revert');
+        else
+            $("#filter-result").css('display', 'none');            
+    })
+    
+    //Filteration script
+    document.addEventListener("DOMContentLoaded", function(){        
+        const modelInput=document.getElementById("model");
+        const manufacturerInput=document.getElementById("manufacturer");
+        const yearInput=document.getElementById("year");
+        const priceInput=document.getElementById("price");      
+        //Onchange will trigger the validate Price field function to make price field is not empty
+        $("#option").on('change',validatePriceField);
+        $("#rating-value").on('change', validRatingField);
+        $("#rating-option").on('change', validRatingField);
+        const localityInput=document.getElementById("locality");
+        const districtInput=document.getElementById("district");
+        const stateInput=document.getElementById("state");
+        const pincodeInput=document.getElementById("pincode");
+        modelInput.addEventListener("input", filter);
+        manufacturerInput.addEventListener("input", filter);
+        yearInput.addEventListener("input", filter);     
+        priceInput.addEventListener("input", filter);                       
+        localityInput.addEventListener("input", filter);
+        districtInput.addEventListener("input", filter);
+        stateInput.addEventListener("input", filter);
+        pincodeInput.addEventListener("input", filter);
+        $("#min-price,  #max-price").on('change', validateMinAndMaxPrice);
+        function validateMinAndMaxPrice(){
+            let minPrice=parseFloat(document.getElementById("min-price").value);
+            let maxPrice=parseFloat(document.getElementById("max-price").value);
+            if(!isNaN(minPrice) && !isNaN(maxPrice)){                
+                if(minPrice<=maxPrice)
+                    //Will trigger filter method
+                    filter();
+                else{
+                    swal({
+                        title: "Info!",
+                        text: "Minimum price must be lesser than maximum price",
+                        icon: "info",
+                        button: "Okay"
+                    });
+                }                
+            }
+            else
+                filter();                                        
+        }
+
+        function validatePriceField(){            
+            if(isNaN(parseFloat(document.getElementById("price").value))){                
+                swal({
+                    title: "Info!",
+                    text: "Please enter amount in price field",
+                    icon: "info",
+                    button: "Okay"
+                });
+            }
+            else
+                //Will trigger filter method
+                filter();
+        }
+        
+        function validRatingField(){
+            let selectedOption=parseInt($("#rating-value").val());
+            if(selectedOption==-1){
+                swal({
+                    title: "Info!",
+                    text: "Please select Star rating option",
+                    icon: "info",
+                    button: "Okay"
+                });
+            }
+            else
+                //Will trigger filter method
+                filter();
+        }
+
+        function filter(){   
+            let totalCardsCount=0, hiddenCardsCount=0;         
+            const cards=document.querySelectorAll(".column");            
+            const model=modelInput.value.toUpperCase();
+            const manufacturer=manufacturerInput.value.toUpperCase();         
+            const year=parseInt(yearInput.value);     
+            const price=parseFloat(priceInput.value);             
+            const locality=localityInput.value.toUpperCase();                       
+            const district=districtInput.value.toUpperCase();
+            const state=stateInput.value.toUpperCase();
+            const pincode=pincodeInput.value;         
+            const minPrice=parseFloat(document.getElementById("min-price").value);
+            const maxPrice=parseFloat(document.getElementById("max-price").value);            
+            const ratingValue=parseFloat($("#rating-value").val());
+            const ratingOption=parseInt($("#rating-option").val());            
+            cards.forEach(card => {                   
+                totalCardsCount++;           
+                let modelContains = card.querySelector(".field1").getAttribute('value').includes(model);    
+                let manufacturerContains = card.querySelector(".field2").getAttribute('value').includes(manufacturer);
+                let yearContains = parseInt(card.querySelector(".field3").getAttribute('value'));  
+                let priceContains = parseFloat(card.querySelector(".field4").getAttribute('value'));
+                let priceOption = parseInt(document.getElementById("option").value);
+                let localityContains = card.querySelector(".field5").getAttribute('value').toUpperCase().includes(locality);
+                let districtContains = card.querySelector(".field6").getAttribute('value').toUpperCase().includes(district);
+                let stateContains = card.querySelector(".field7").getAttribute('value').toUpperCase().includes(state);
+                let pincodeContains = card.querySelector(".field8").getAttribute('value');                   
+                let ratingContains = parseFloat(card.querySelector(".field0").getAttribute('value'));
+                let priceBetween = (minPrice<priceContains && maxPrice>priceContains)?(true):(false);                               
+                switch(priceOption){
+                    case 0 : priceContains=(price<priceContains)?(true):(false); break;
+                    case 1 : priceContains=(price==priceContains)?(true):(false); break;
+                    case 2 : priceContains=(price>priceContains)?(true):(false); break;
+                }   
+                switch(ratingOption){
+                    case 0 : ratingContains=(ratingValue<ratingContains)?(true):(false); break;
+                    case 1 : ratingContains=(ratingValue==ratingContains)?(true):(false); break;
+                    case 2 : ratingContains=(ratingValue>ratingContains)?(true):(false); break;
+                }                        
+                if((model==='' || modelContains) && (manufacturer==='' || manufacturerContains) && (isNaN(year) || (yearContains==year)) && 
+                        (isNaN(price) || priceContains) && (ratingValue==-1 || ratingContains) && (isNaN(minPrice) || isNaN(maxPrice) || priceBetween) && (locality==='' || localityContains) && (district==='' || districtContains) && 
+                        (state==='' || stateContains) && (pincode==='' || pincodeContains===pincode)
+                    )
+                    card.style.display = "revert"; // Show the card
+                else {
+                    card.style.display = "none"; // Hide the card                            
+                    hiddenCardsCount++;
+                }
+            });            
+            if(totalCardsCount==hiddenCardsCount)
+                $("#filter-result").css('display', 'revert');
+            else
+                $("#filter-result").css('display', 'none');            
+        }
+    })
+
+    //Fetch contact info
+    $('.table .btn-warning').on('click', function(event){     
+        event.preventDefault();        
+        var href=$(this).attr('href');   
+        $.get(href, function(account, status){            
+            $("#contact-email").text(account.emailId)
+            $("#contact-mobile").text("+"+account.mobileNumber)
+            $("#contact-address").text(account.city+", "+account.district+", "+account.state)
+            $("#contact-pincode").text(account.pinCode)
+        });
+        $("#info").prop("class", "toast show")
+    });
+
+    //Book Trip Modal
+    $(".table .btn-primary").on("click", function(event){
+        event.preventDefault();
+        var href=$(this).attr('href');
+        $.get(href, function(car, status){
+            $("#bookTrip #carId").val(car._id)
+        });
+        $("#bookTrip").modal("show");
+    });    
+
+    //Fetch car reviews
+    $(".table .btn-success").on("click", function(event){
+        event.preventDefault();
+        let href=$(this).attr('href');
+        $.get(href, function(car, status){            
+            if(car.length==0){
+                swal({
+                    title: "Info!",
+                    text: "No Reviews yet",
+                    icon: "info",
+                    button: "Okay"
+                });
+            }
+            else{
+                var outerDiv=document.getElementById("review");
+                outerDiv.innerHTML='';
+                for(let i=0;i<car.length;i++){                    
+                    var innerDiv=document.createElement('div');
+                    innerDiv.innerHTML=
+                    "<span style='color:red'><i class='bi bi-person-circle'></i>&nbsp;&nbsp;<b>Review By : </b></span>"+car[i][0]+"<br>"+
+                    "<i class='bi bi-chat-left-dots-fill'></i>&nbsp;&nbsp;<b>"+car[i][1]+"</b><br>"+
+                    "<span style='color:blue'><small><i class='bi bi-clock-fill'></i>&nbsp;&nbsp;<b>"+car[i][2]+" "+car[i][3]+"</b></small></span><br>"+
+                    "<hr>";
+                    outerDiv.appendChild(innerDiv);
+                }
+                $("#reviews").modal('show');
+            }
+        })
+    })
+
+    //Fetch slots by carId
+    $(".table .btn-danger").on("click", function(event){
+        event.preventDefault();
+        var href=$(this).attr('href');
+        $.get(href, function(slots, status){                      
+            if(slots.length==0){
+                swal({
+                    title: "Info!",
+                    text: "No Slots have been booked",
+                    icon: "info",
+                    button: "Okay"
+                });
+            }
+            else{
+                var tableBody = document.querySelector('#tripSlots tbody');    
+                tableBody.innerHTML='';            
+                for(let i=0;i<slots.length;i++){
+                    //Creating row
+                    var row = document.createElement('tr');
+                    //Creating first column
+                    var cell1= document.createElement('td');
+                    cell1.textContent=slots[i][0];
+                    row.appendChild(cell1);
+                    //Creating second column
+                    var cell2= document.createElement('td');
+                    cell2.textContent=slots[i][1];
+                    row.appendChild(cell2);
+                    //Appending entire row to the table body
+                    tableBody.appendChild(row);
+                }            
+                $("#tripSlots").modal('show');  
+            }
+        });        
+    })
+
+    //Book Trip Form Data Handling
+    const bookTrip=()=>{        
+        var formElement = document.getElementById('bookTripForm');        
+        let carId = formElement.elements['carId'].value;
+        let tripStartDate = formElement.elements['tripStartDate'].value;
+        let tripEndDate = formElement.elements['tripEndDate'].value;
+        if(carId=='' || tripStartDate=='' || tripEndDate==''){
+            swal({
+                title: "Oops!!",
+                text: "Incomplete Form",
+                icon: "error",                            
+                button : "Okay"
+            });
+            return ;
+        }
+        $.ajax({                
+            url:'/car-rental-system/app/book-trip',
+            data: JSON.stringify({carId:carId, tripStartDate:tripStartDate, tripEndDate:tripEndDate}),
+            contentType:'application/json',
+            type:'POST',
+            dataType:'json',                                            
+            success:function(response){                   
+                if(response=="1"){
+                    $("#bookTrip").modal('hide');
+                    $("#choices #carId").val(carId);
+                    $("#choices #tripStartDate").val(tripStartDate);
+                    $("#choices #tripEndDate").val(tripEndDate);
+                    $("#choices").modal('show');
+                }
+                else if(response=="2"){                    
+                    swal({
+                        title: "Oops!!",
+                        text: "Trip is already booked on the given date",
+                        icon: "error",                            
+                        button : true
+                    });
+                }
+                else if(response=="3"){                    
+                    swal({
+                        title: "Oops!!",
+                        text: "Invalid Date Injected, Please input correct date",
+                        icon: "error",                            
+                        button : true
+                    });
+                }
+                else if(response=="4"){
+                    swal({
+                        title: "Oops!!",
+                        text: "You have already booked for another car on the given date",
+                        icon: "error",                            
+                        button : true
+                    });
+                }
+            },
+            error:function(error){
+                console.log(error);
+            }
+        })
+    }
+
+    //Booking process script
+    const proceedBooking=()=>{
+        $("#choices").modal('hide');
+        console.log("Booking process started..")        
+        let carId=$("#choices #carId").val();
+        let tripStartDate=$("#choices #tripStartDate").val();
+        let tripEndDate=$("#choices #tripEndDate").val();                     
+        //Create Order ID..
+        $.ajax({
+            url:'/car-rental-system/app/create-order',
+            data: JSON.stringify({carId:carId, tripStartDate:tripStartDate, tripEndDate:tripEndDate}),
+            contentType:'application/json',
+            type:'POST',
+            dataType:'json',
+            success:function(response){
+                console.log(response)
+                //Success will be triggered when response is success..                
+                if(response.status=='created'){
+                    //Open payment form
+                    let options={
+                        key:'rzp_test_AZSLzVBmowbvZk',
+                        amount:response.amount,
+                        currency:'INR',
+                        name:'Car Rental System',
+                        description:'Book your car safely',                        
+                        order_id:response.id,
+                        handler:function(razorPay){
+                            $.ajax({
+                                url:'/car-rental-system/app/update-order',
+                                data: JSON.stringify({orderId:razorPay.razorpay_order_id, paymentId:razorPay.razorpay_payment_id}),                                
+                                contentType:'application/json',
+                                timeout:100000,
+                                type:'PUT',
+                                dataType:'json',
+                                success:function(response){  
+                                    console.log("Success")
+                                },
+                                error:function(error){                                          
+                                    console.log(response)
+                                    swal({
+                                        title: "Good job!",
+                                        text: "Trip has been booked successfully!!",
+                                        icon: "success",
+                                        button: false
+                                    });
+                                    setTimeout(() => { window.location.href="/car-rental-system/app/fetchTrips"; }, 5000);
+                                }
+                            })                      
+                        },
+                        prefill: {
+                            name: response.name,
+                            email: response.email,
+                            contact: response.contact                          
+                        },
+                        theme: {
+                            color: '#00E6F6'
+                        },
+                        notes: {
+                            address:'Book Trip'
+                        }
+                    };
+                    let razorpayForm=new Razorpay(options);
+                    razorpayForm.on('payment.failed', function (response){
+                        console.log(response.error.code);
+                        console.log(response.error.description);
+                        console.log(response.error.source);
+                        console.log(response.error.step);
+                        console.log(response.error.reason);
+                        console.log(response.error.metadata.order_id);
+                        console.log(response.error.metadata.payment_id);                        
+                        setTimeout(() => { window.location.href="/car-rental-system/app/fetchAllCars"; }, 4000);
+                    });                    
+                    razorpayForm.open();
+                }
+            },
+            error:function(error){
+                //Error will be triggered when response is failure..
+                console.log(error);
+            }            
+        })             
+    }
+</script>

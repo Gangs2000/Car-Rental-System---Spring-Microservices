@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="https://thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>    
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>    
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>    
+    <title>Register New Car</title>    
+</head>
+<body style="background-color:ghostwhite; overflow:hidden;">         
+    <div class="container-fluid">
+        <div class="row">
+            <!--Top Navigation Bar-->
+            <div class="container">
+                <div class="row" id="titleBar"></div>
+            </div>
+        </div>     
+        <div class="row">
+            <!--Side Nav Bar-->            
+            <div class="col-sm-3" id="sideBar"></div>                
+            <!--Content Page-->
+            <div class="col-sm">
+                <div class="container">
+                    <!-- Register New Car -->
+                    <div class="col-sm-4" style="margin-top:8%; margin-left:12%; width:65%; background-color:white; padding:5%">
+                        <form id="registration">
+                            <div class="mb-3">
+                                <h3 style="color:red;">Register New Car</h3><br>                                
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <label class="form-label"><b>Enter Car Number :</b></label>                                
+                                        <input type="text" style="text-transform: uppercase;" id="carId" placeholder="TN XX X XXXX" class="form-control" autocomplete="off" required>                                            
+                                    </div> 
+                                    <div class="col-sm">
+                                        <label class="form-label"><b>Enter Car Model :</b></label>                                
+                                        <input type="text" style="text-transform: capitalize;" id="carModel" placeholder="Audi S10" class="form-control" autocomplete="off" required>
+                                    </div>                                    
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <label class="form-label"><b>Enter Car Manufacturer :</b></label>
+                                        <input type="text" style="text-transform: capitalize;" id="manufacturer"  placeholder="Audi" class="form-control" autocomplete="off" required>
+                                    </div>
+                                    <div class="col-sm">
+                                        <label class="form-label"><b>Enter Model Year :</b></label>
+                                        <input type="number" id="year" placeholder="2000" class="form-control" min="1900" max="3000" step="1" autocomplete="off" required>
+                                    </div>
+                                </div>                            
+                            </div>
+                            <div class="mb-3">
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <label class="form-label"><b>Enter Price ( per day ) :</b></label>
+                                        <input type="number" id="pricePerDay" placeholder="Rs.1500.00" class="form-control" min="1.00" step="0.1" autocomplete="off" required>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <label class="form-label"><b>Enter PostalCode :</b></label>
+                                        <div class="row">
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="postalCode" maxlength="6" placeholder="eg:625012" autocomplete="off" required>                                    
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <button type="button" class="btn btn-primary" onclick="fetchGeoLocation()" style="width:100%"><b>Fetch Location</b></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3" id="geoLocation" style="display: none;">
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <label class="form-label"><b>Select Locality : </b></label>
+                                        <select class="form-select" id="places"></select>
+                                    </div>
+                                    <div class="col-sm">
+                                        <label class="form-label"><b>Select District : </b></label>
+                                        <select class="form-select" id="districts"></select>
+                                    </div>
+                                    <div class="col-sm">
+                                        <label class="form-label"><b>Select State : </b></label>
+                                        <select class="form-select" id="state"></select>
+                                    </div>
+                                </div>
+                            </div><br>                      
+                            <center><button type="button" onclick="submitRegisterForm()" class="btn" style="width:100%; background-color:#306ae6; color:white"><strong><i class="bi bi-plus-circle-fill"></i>&nbsp;&nbsp;Register Car</strong></button></center><br>
+                        </form>
+                    </div>
+                    <div class="col-sm-4"></div>                                
+                </div>                
+            </div>            
+        </div>
+    </div>
+</body>
+</html>
+<script>    
+    //Load Title Bar
+    $(function(){
+        $("#titleBar").load("titleBar");
+    });        
+    //Load Side Bar
+    $(function(){
+        $("#sideBar").load("sideBar");
+    });        
+
+    //Fetch Geo Location data
+    const fetchGeoLocation=()=>{         
+        let postalCode=document.getElementById("postalCode").value;
+        if(postalCode.length!=0){
+            console.log("Fetching GeoLocation started..");        
+            $.ajax({                
+                url:'/car-rental-system/app/fetch-geo-location',
+                data: JSON.stringify({postalCode:postalCode}),
+                contentType:'application/json',
+                type:'POST',
+                dataType:'json',                                            
+                success:function(response){                                            
+                    if(Object.keys(response).length!=0){
+                        //Clearing all three drop downs before appending new values  
+                        var places=document.getElementById("places");
+                        var districts=document.getElementById("districts");
+                        var states=document.getElementById("state");
+                        places.innerHTML='';                       
+                        districts.innerHTML='';
+                        state.innerHTML='';        
+                        for(var key in response){
+                            let list=response[key];
+                            for(var index in list){
+                                var optionElement = document.createElement('option');
+                                optionElement.value = list[index];
+                                optionElement.textContent = list[index];
+                                switch(key){
+                                    case "places" : places.appendChild(optionElement); break;
+                                    case "districts" : districts.appendChild(optionElement); break;
+                                    case "state" : states.appendChild(optionElement); break;
+                                }                            
+                            }                        
+                        }                       
+                        document.getElementById("geoLocation").style.display="block";                 
+                    }
+                    else{
+                        swal({
+                            title: "Oops!!",
+                            text: "Invalid postal code",
+                            icon: "error",                            
+                            button : true
+                        });
+                    }                        
+                },                
+                error:function(error){
+                //Error will be triggered when response is not success..
+                    console.log(error);
+                    swal({
+                        title: "Oops!!",
+                        text: "Somthing Went Wrong",
+                        icon: "error",                            
+                        button : true
+                    });
+                }
+            })
+        }            
+        else{
+            swal({
+                title: "Oops!!",
+                text: "Enter PostalCode",
+                icon: "error",                            
+                button : "Okay"
+            });
+        }
+    }    
+    
+    //Register new Car
+    const submitRegisterForm=()=>{
+        var formElement = document.getElementById('registration');
+        let carId = formElement.elements['carId'].value;
+        let carModel = formElement.elements['carModel'].value;
+        let manufacturer = formElement.elements['manufacturer'].value;
+        let year = formElement.elements['year'].value;
+        let pricePerDay = formElement.elements['pricePerDay'].value;
+        let postalCode = formElement.elements['postalCode'].value;
+        let locality = formElement.elements['places'].value;
+        let district = formElement.elements['districts'].value;
+        let state = formElement.elements['state'].value;        
+        if(carId=='' || carModel=='' || manufacturer=='' || year=='' || pricePerDay=='' || postalCode=='' || locality=='' || district=='' || state==''){
+            swal({
+                title: "Oops!!",
+                text: "Incomplete Form",
+                icon: "error",                            
+                button : "Okay"
+            });
+            return ;
+        }
+        $.ajax({                
+            url:'/car-rental-system/app/register-new-car',
+            data: JSON.stringify({carId:carId, carModel:carModel, manufacturer:manufacturer, year:year, pricePerDay:pricePerDay, postalCode:postalCode, locality:locality, district:district, state:state}),
+            contentType:'application/json',
+            type:'POST',
+            dataType:'json',                                            
+            success:function(response){   
+                console.log(response)
+                if(response){
+                    swal({
+                        title: "Submitted",
+                        text: "Car has been registered",
+                        icon: "success",
+                        button: false                    
+                    });                    
+                }
+                else {
+                    //Error if email ID is already registered
+                    swal({
+                        title: "Oops!!",
+                        text: "Car Number is already registered",
+                        icon: "error",                            
+                        button : false
+                    });
+                }
+                setTimeout(() => { window.location.href="/car-rental-system/app/registerNewCar"; }, 3000);
+            },
+            error:function(error){
+                console.log(error);
+            }
+        })
+    }
+</script>

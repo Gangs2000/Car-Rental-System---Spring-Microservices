@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html xmlns:th="https://thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>        
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>    
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>    
+    <title>Trips</title>   
+    <style>
+        .card:hover{
+            box-shadow: 5px 5px 5px 5px #888888;
+            background-color:black;            
+            color:white;
+        }
+    </style> 
+</head>
+<body style="background-color:ghostwhite;">         
+    <div class="container-fluid">
+        <!--Toast box-->
+        <div class="position-fixed bottom-0 start-0 p-3" style="z-index: 11;">
+            <div id="info" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true">
+                <div class="toast-header">                                    
+                    <strong class="me-auto">Car Details</strong>                                
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body" style="background-color:black; color:white">
+                    <b>Rating : </b><span id="car-rating"></span><br>
+                    <b>Car Number : </b><span id="car-number"></span><br>
+                    <b>Owner : </b><span id="car-owner"></span><br>
+                    <b>Car Model : </b><span id="model"></span><br>
+                    <b>Manufacturer : </b><span id="manufacturer"></span><br>                     
+                    <b>Address : </b><span id="address"></span><br>
+                    <b>Pincode : </b><span id="pincode"></span><br>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <!--Top Navigation Bar-->
+            <div class="container">
+                <div class="row" id="titleBar"></div>
+            </div>
+        </div>     
+        <div class="row">
+            <!--Side Nav Bar-->            
+            <div class="col-sm-3" id="sideBar"></div>                
+            <!--Content Page-->
+            <div class="col-sm" style="overflow: auto;">                           
+                <div style="background-color: white; margin-top:1%; padding:5%; overflow: auto;">  
+                    <div class="row">
+                        <div class="col-sm" style="position:fixed; color:red; margin-left:30%;"><h3>Trips</h3></div>
+                    </div><br><br><br>                                    
+                    <select class="form-select" id="choice" style="position:fixed; margin-left:20%; width:20%">
+                        <option value="1">Upcoming trips</option>
+                        <option value="2">Ongoing trips</option>
+                        <option value="3">Past trips</option>
+                    </select><br><br><br>                       
+                    <div class="row" id="upcoming" style="display:block;">
+                        <div th:if="${upcomingSize}==0">
+                            <center>
+                                <p style="font-size:24px; margin-top:6%; font-weight:bold;">No Upcoming Trips available to be shown</p>
+                                <i class="bi bi-emoji-frown" style="font-size:100px"></i><br><br>
+                                <a class="btn btn-primary" th:href="'/car-rental-system/app/fetchAllCars'"><i class="bi bi-calendar2-event-fill"></i>&nbsp;&nbsp;<b>Book a Trip</b></a>
+                            </center>
+                        </div>
+                        <div th:if="${upcomingSize}!=0">
+                            <h3 style="color:red; position:fixed;">Upcoming Trips</h3><br><br><br>
+                            <table class="table" style="border:none;">
+                                <tbody>
+                                    <tr class="info" style="border: none;">                            
+                                        <td th:each="upcomingTrip : ${upcoming}" scope="row">
+                                            <div class="card" style="width: 25rem; height:25rem;">                                    
+                                                <div class="card-body"  style="overflow:auto; margin-left:5%;">
+                                                    <p class="card-text">
+                                                        <h5 th:text="'Car Number : '+${upcomingTrip.carId}"/><br>
+                                                        <p th:inline="text"><b>Payment ID :</b> [[${upcomingTrip.paymentId}]]</p>
+                                                        <p th:inline="text"><b>Trip Status :</b> [[${upcomingTrip.tripStatus}]]</p>
+                                                        <p th:inline="text"><b>Trip start date :</b> [[${upcomingTrip.tripStartDate}]]</p>
+                                                        <p th:inline="text"><b>Trip end date :</b> [[${upcomingTrip.tripEndDate}]]</p>
+                                                        <p th:inline="text"><b>Amount Paid :</b> Rs.[[${upcomingTrip.amount}]]</p>                                                        
+                                                    </p>
+                                                </div>
+                                                <div class="card-footer" style="padding:4%;">
+                                                    <div class="row" style="margin-left:8%;">                                                        
+                                                        <div th:if="${upcomingTrip.canBeCancelled}==true" class="col-sm">                                                                
+                                                            <a class="btn btn-primary" th:href="'/car-rental-system/app/cancel-order/orderId/'+${upcomingTrip._id}"><i class="bi bi-calendar2-x-fill"></i>&nbsp;&nbsp;<b>Cancel Trip</b></a>
+                                                        </div>
+                                                        <div th:if="${upcomingTrip.canBeCancelled}==false" class="col-sm" title="Trip can't be cancelled one day before">                                                                
+                                                            <a class="btn btn-primary disabled" aria-disabled="true"><i class="bi bi-calendar2-x-fill"></i>&nbsp;&nbsp;<b>Cancel Trip</b></a>                                                                
+                                                        </div>
+                                                        <div class="col-sm">
+                                                            <a class="btn btn-danger" th:href="'/car-rental-system/app/fetch/carId/'+${upcomingTrip.carId}"><i class="bi bi-info-circle-fill"></i>&nbsp;&nbsp;<b>Car Details</b></a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>                                
+                                        </td>                            
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row" id="ongoing" style="display:none">
+                        <div th:if="${ongoingSize}==0">
+                            <center>
+                                <p style="font-size:24px; margin-top:6%; font-weight:bold;">No Ongoing Trips available to be shown</p>
+                                <i class="bi bi-emoji-frown" style="font-size:100px"></i><br><br>
+                                <a class="btn btn-primary" th:href="'/car-rental-system/app/fetchAllCars'"><i class="bi bi-calendar2-event-fill"></i>&nbsp;&nbsp;<b>Book a Trip</b></a>
+                            </center>
+                        </div>
+                        <div th:if="${ongoingSize}!=0">
+                            <h3 style="color:red">Ongoing Trips</h3><br>
+                            <table class="table" style="border:none;">
+                                <tbody>
+                                    <tr class="info" style="border: none;">                            
+                                        <td th:each="ongoingTrip : ${ongoing}" scope="row">
+                                            <div class="card" style="width: 25rem; height:25rem;">                                    
+                                                <div class="card-body"  style="overflow:auto; margin-left:5%;">
+                                                    <p class="card-text">
+                                                        <h5 th:text="'Car Number : '+${ongoingTrip.carId}"/><br>
+                                                        <p th:inline="text"><b>Payment ID :</b> [[${ongoingTrip.paymentId}]]</p>
+                                                        <p th:inline="text"><b>Trip Status :</b> [[${ongoingTrip.tripStatus}]]</p>
+                                                        <p th:inline="text"><b>Trip start date :</b> [[${ongoingTrip.tripStartDate}]]</p>
+                                                        <p th:inline="text"><b>Trip end date :</b> [[${ongoingTrip.tripEndDate}]]</p>
+                                                        <p th:inline="text"><b>Amount Paid :</b> Rs.[[${ongoingTrip.amount}]]</p>                                                    
+                                                    </p>
+                                                </div>
+                                                <div class="card-footer" style="padding:4%;">
+                                                    <div class="row" style="margin-left:10%;">                                                        
+                                                        <div class="col-sm">                                                                
+                                                            <a class="btn btn-primary" th:href="'/car-rental-system/app/fetch/carId/'+${ongoingTrip.carId}"><i class="bi bi-calendar2-plus-fill"></i>&nbsp;&nbsp;<b>Extend Trip</b></a>
+                                                        </div>                                                        
+                                                        <div class="col-sm">
+                                                            <a class="btn btn-danger" th:href="'/car-rental-system/app/fetch/carId/'+${ongoingTrip.carId}"><i class="bi bi-info-circle-fill"></i>&nbsp;&nbsp;<b>Car Details</b></a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>                                
+                                        </td>                            
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row" id="past" style="display:none;">
+                        <div th:if="${pastSize}==0">
+                            <center>
+                                <p style="font-size:24px; margin-top:6%; font-weight:bold;">No Cars have been rented</p>
+                                <i class="bi bi-emoji-frown" style="font-size:100px"></i><br><br>
+                                <a class="btn btn-primary" th:href="'/car-rental-system/app/fetchAllCars'"><i class="bi bi-calendar2-event-fill"></i>&nbsp;&nbsp;<b>Book a Trip</b></a>
+                            </center>
+                        </div>
+                        <div th:if="${pastSize}!=0">
+                            <h3 style="color:red">Past Trips</h3><br>
+                            <table class="table" style="border:none;">
+                                <tbody>
+                                    <tr class="info" style="border: none;">                            
+                                        <td th:each="pastTrip : ${past}" scope="row">
+                                            <div class="card" style="width: 25rem; height:25rem;">                                    
+                                                <div class="card-body"  style="overflow:auto; margin-left:5%;">
+                                                    <p class="card-text">
+                                                        <div class="row">
+                                                            <div class="col-sm-9"><h5 th:text="'Car Number : '+${pastTrip.carId}"/></div>
+                                                            <div class="col-sm-3"><button title="feedback" class="btn btn-warning" style="border-radius:50%;" th:value="${pastTrip.carId}"><i class="bi bi-chat-left-text-fill"></i></button></div>
+                                                        </div>
+                                                        <br>                                                        
+                                                        <p th:inline="text"><b>Payment ID :</b> [[${pastTrip.paymentId}]]</p>
+                                                        <p th:inline="text"><b>Trip Status :</b> [[${pastTrip.tripStatus}]]</p>
+                                                        <p th:inline="text"><b>Trip start date :</b> [[${pastTrip.tripStartDate}]]</p>
+                                                        <p th:inline="text"><b>Trip end date :</b> [[${pastTrip.tripEndDate}]]</p>
+                                                        <p th:inline="text"><b>Amount Paid :</b> Rs.[[${pastTrip.amount}]]</p>                                                                                                                        
+                                                    </p>                                                    
+                                                </div>
+                                                <div class="card-footer" style="padding:4%;">
+                                                    <div class="row" style="margin-left:10%;">                                                        
+                                                        <div class="col-sm">                                                                
+                                                            <a class="btn btn-primary" th:href="'/car-rental-system/app/fetch/carId/'+${pastTrip.carId}"><i class="bi bi-calendar2-event-fill"></i>&nbsp;&nbsp;<b>Book again</b></a>
+                                                        </div>
+                                                        <div th:if="${pastTrip.ratingGiven}==true" class="col-sm" title="Rating Submitted">                                                                
+                                                            <a class="btn btn-danger disabled" aria-disabled="true"><i class="bi bi-star-fill"></i>&nbsp;&nbsp;<b>Rate Car</b></a>
+                                                        </div>
+                                                        <div th:if="${pastTrip.ratingGiven}==false" class="col-sm">                                                                
+                                                            <a class="btn btn-danger" th:value=${pastTrip.carId} th:title=${pastTrip._id}><i class="bi bi-star-fill"></i>&nbsp;&nbsp;<b>Rate Car</b></a>
+                                                        </div>                                                        
+                                                    </div>
+                                                </div>
+                                            </div>                                
+                                        </td>                            
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Modal Box to Book car-->
+    <div class="modal fade" id="bookTrip" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" style="margin-left:33%;">
+            <div class="modal-content" style="width:140%; padding:5%">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="availability">Book Trip</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">   
+                    <form id="bookTripForm">
+                        <div class="row">
+                            <div class="col-sm">
+                                <label class="form-label"><b>Car Number :</b></label>                                
+                                <input type="text" style="text-transform: uppercase;" name="carId" id="carId" placeholder="TN XX X XXXX" class="form-control" readonly>                                            
+                            </div> 
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm">
+                                <label class="form-label"><b>Choose Trip Start Date :</b></label>                                
+                                <input type="date" id="tripStartDate" name="tripStartDate" class="form-control" autocomplete="off" required>                            
+                            </div>                                    
+                            <div class="col-sm">
+                                <label class="form-label"><b>Choose Trip End Date :</b></label>                                
+                                <input type="date" id="tripEndDate" name="tripEndDate" class="form-control" autocomplete="off" required>
+                            </div>                                    
+                        </div><br>                                                            
+                        <button type="button" class="btn btn-primary" style="width:100%; font-weight:bold;" onclick="bookTrip()"><i class="bi bi-calendar-week-fill"></i>&nbsp;&nbsp;Book Trip</button>
+                    </form>
+                </div>                
+            </div>
+        </div>
+    </div>
+
+    <!--Modal Box to Choose choices-->
+    <div class="modal fade" id="choices" tabindex="-1" aria-labelledby="choices" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="choices">Hurray!!</h5>                    
+                </div>
+                <div class="modal-body">  
+                    Trip can be booked for the given date, Want to proceed?<br><br>    
+                    <input type="hidden" id="carId">
+                    <input type="hidden" id="tripStartDate">
+                    <input type="hidden" id="tripEndDate">.
+                    <button type="button" class="btn btn-primary" onclick="proceedBooking()"><i class="bi bi-check-circle-fill"></i>&nbsp;&nbsp;<b>Proceed to book</b></button>                
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-x-circle-fill"></i>&nbsp;&nbsp;<b>Abort</b></button>
+                </div>
+            </div>
+        </div>
+    </div>    
+
+    <!--Modal Box to display cancellation trip form-->
+    <div class="modal fade" id="cancellationTrip" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" style="margin-left:33%;">
+            <div class="modal-content" style="width:140%; padding:5%">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelTrip">Cancel Trip</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">                    
+                    <div class="mb-3">                                                       
+                        <label class="form-label"><b>Order ID :</b></label>
+                        <input type="text" class="form-control" id="orderId" readonly>                                                        
+                    </div>
+                    <div class="mb-3">                        
+                        <label class="form-label"><b>Cancellation Reason :</b></label>                        
+                        <textarea class="form-control" id="reason" placeholder="Please provide cancellation reason" rows="3" required></textarea>
+                    </div><br>                    
+                    <button type="button" class="btn btn-primary" style="width:100%; font-weight:bold;" onclick="cancelTrip()"><i class="bi bi-calendar2-x-fill"></i>&nbsp;&nbsp;Cancel Trip</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Modal Box to collect feedback from user-->
+    <div class="modal fade" id="feedbackForm" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" style="margin-left:33%;">
+            <div class="modal-content" style="width:140%; padding:5%;">
+                <div class="modal-header">
+                    <h5 class="modal-title">Feedback Form</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">                    
+                    <div class="mb-3">                                                       
+                        <label class="form-label"><b>Car Number:</b></label>
+                        <input type="text" class="form-control" id="car-number" readonly>
+                    </div>
+                    <div class="mb-3">                        
+                        <label class="form-label"><b>How was your trip ?</b></label> 
+                        <textarea class="form-control" id="feedback" placeholder="Please provide Trip experience with us" rows="3" required></textarea>
+                    </div><br>                    
+                    <button type="button" class="btn btn-primary" style="width:100%; font-weight:bold;" onclick="submitFeedback()"><i class="bi bi-chat-left-dots-fill"></i>&nbsp;&nbsp;Submit Feedback</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Modal Box to show rating star-->
+    <div class="modal modal-sm fade" id="rating" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" style="margin-left:33%;">
+            <div class="modal-content" style="width:140%; padding:5%">
+                <div class="modal-header">
+                    <h5 class="modal-title">Rate Car</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">     
+                    <!--Order Id-->
+                    <input type="hidden" id="orderId">
+                    <!--Car ID-->               
+                    <input type="hidden" id="carId">
+                    <!--Stars-->
+                    <div style="padding:5%; font-size:35px; text-align:center;">
+                        <button type="button" class="btnrating" style="background-color:white; border:none" data-attr="1" id="rating-star-1">
+                            <i class="bi bi-star-fill" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="btnrating" style="background-color:white; border:none" data-attr="2" id="rating-star-2">
+                            <i class="bi bi-star-fill" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="btnrating" style="background-color:white; border:none" data-attr="3" id="rating-star-3">
+                            <i class="bi bi-star-fill" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="btnrating" style="background-color:white; border:none" data-attr="4" id="rating-star-4">
+                            <i class="bi bi-star-fill" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="btnrating" style="background-color:white; border:none" data-attr="5" id="rating-star-5">
+                            <i class="bi bi-star-fill" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <!--Selected Star Rate-->
+                    <input type="hidden" id="selectedRate">
+                    <button type="button" class="btn btn-primary" style="width:100%; font-weight:bold;" onclick="rateCar()"><i class="bi bi-check-circle-fill"></i>&nbsp;&nbsp;Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    //Load Title Bar
+    $(function(){
+        $("#titleBar").load("titleBar");
+    });        
+    //Load Side Bar
+    $(function(){
+        $("#sideBar").load("sideBar");
+    });        
+
+    //Fetch Car Details
+    $("#upcoming .table .btn-danger, #ongoing .table .btn-danger").on('click', function(event){
+        event.preventDefault();
+        var href=$(this).attr('href');
+        $.get(href, function(car, status){            
+            $("#info #car-rating").text(car.carRating[2]+"/5");
+            $("#info #car-number").text(car._id);
+            $("#info #car-owner").text(car.ownedBy);
+            $("#info #model").text(car.carModel);
+            $("#info #manufacturer").text(car.manufacturer);
+            $("#info #address").text(car.locality+", "+car.district+", "+car.state);
+            $("#info #pincode").text(car.pinCode);
+        })
+        $("#info").prop("class", "toast show");
+    })
+
+    //Book Trip Modal
+    $("#past .table .btn-primary, #ongoing .table .btn-primary").on("click", function(event){
+        event.preventDefault();
+        var href=$(this).attr('href');
+        $.get(href, function(car, status){
+            $("#bookTrip #carId").val(car._id)
+        });
+        $("#bookTrip").modal("show");
+    });    
+
+    //Rate car modal
+    $("#past .table .btn-danger").on('click', function(){           
+        //Reset values     
+        $("#rating #carId").val("");
+        $("#rating #orderId").val("");
+        $("#rating #selectedRate").val(0);
+        $("#rating .btnrating").css('color', 'black');
+        let carId=$(this).attr('value');
+        let orderId=$(this).attr('title');
+        //Set values
+        $("#rating #carId").val(carId);   
+        $("#rating #orderId").val(orderId);     
+        $("#rating").modal('show');
+    })
+
+    //Open feedback form6
+    $("#past .table .btn-warning").on('click', function(){
+        $("#feedbackForm #car-number").val($(this).attr('value'));
+        $("#feedbackForm").modal('show');
+    })
+
+    //Submit feedback
+    const submitFeedback=()=>{
+        let carId=$("#feedbackForm #car-number").val();
+        let feed=$("#feedbackForm #feedback").val();
+        if(feed==''){
+            swal({
+                title: "Oops!!",
+                text: "Please provide feedback",
+                icon: "info",                            
+                button : "Okay"
+            });
+            return ;
+        }
+        $.ajax({
+            url: '/car-rental-system/app/post/review',
+            data: JSON.stringify({carId:carId, feedBack:feed}),
+            contentType: "application/json",
+            type: "POST",
+            success:function(response){
+                swal({
+                    title: "Good job!",
+                    text: "Thanks for the valuable feedback",
+                    icon: "success",
+                    button: "Okay"
+                });     
+                $("#feedbackForm #feedback").val('');
+                $("#feedbackForm").modal("hide");
+            },
+            error:function(error){
+                alert("Faliure response");
+            }
+        })        
+    }
+
+    //Submit rating
+    const rateCar=()=>{
+        let orderId=$("#rating #orderId").val();
+        let carId=$("#rating #carId").val();
+        let rating=$("#rating #selectedRate").val();
+        $.ajax({
+            url:'/car-rental-system/app/fetch-order/orderId/'+orderId,
+            contentType: 'application/json',
+            type: 'GET',
+            dataType: 'JSON',
+            success:function(outerResponse){                
+                if(!outerResponse.ratingGiven){
+                    $.ajax({
+                        url: '/car-rental-system/app/update/rating',
+                        data: JSON.stringify({orderId:orderId, carId:carId, rating:rating}),
+                        contentType: 'application/json',
+                        type: 'PUT',
+                        dataType: 'json',
+                        success:function(innerResponse){
+                            $("#rating").modal('hide');                
+                            if(innerResponse.ratingGiven){
+                                swal({
+                                    title: "Good job!",
+                                    text: "Thanks for the rating",
+                                    icon: "success",
+                                    button: true
+                                });
+                            }                
+                        },
+                        error:function(error){
+                            console.log("Error in calling inner API");
+                        }
+                    })
+                }   
+                else{
+                    swal({
+                        title: "Info!",
+                        text: "Rating is already submitted",
+                        icon: "info",
+                        button: true
+                    });
+                }             
+            },
+            error:function(error){
+                console.log("Error in calling outer API")
+            }
+        })        
+    }
+
+    //Calculating star rate
+    jQuery(document).ready(function($) {
+        $("#rating .btnrating").on('click', function(e) {
+            var previous_value = $("#selected_rating").val();
+            var selected_value = $(this).attr("data-attr");
+            // Reset all buttons to black color
+            $("#rating .btnrating").css('color', 'black');
+
+            // Set the selected buttons to red color
+            for (i = 1; i <= selected_value; ++i) {
+                $("#rating #rating-star-" + i).css('color', 'red');
+            }
+
+            // Reset the previous buttons to black  color
+            for (ix = 1; ix <= previous_value; ++ix) {
+                $("#rating #rating-star-" + ix).css('color', 'black');
+            }
+            $("#rating #selectedRate").val(selected_value);            
+        });
+    });    
+
+    //Book Trip Form Data Handling
+    const bookTrip=()=>{        
+        var formElement = document.getElementById('bookTripForm');        
+        let carId = formElement.elements['carId'].value;
+        let tripStartDate = formElement.elements['tripStartDate'].value;
+        let tripEndDate = formElement.elements['tripEndDate'].value;
+        if(carId=='' || tripStartDate=='' || tripEndDate==''){
+            swal({
+                title: "Oops!!",
+                text: "Incomplete Form",
+                icon: "error",                            
+                button : "Okay"
+            });
+            return ;
+        }
+        $.ajax({                
+            url:'/car-rental-system/app/book-trip',
+            data: JSON.stringify({carId:carId, tripStartDate:tripStartDate, tripEndDate:tripEndDate}),
+            contentType:'application/json',
+            type:'POST',
+            dataType:'json',                                            
+            success:function(response){                   
+                if(response=="1"){
+                    $("#bookTrip").modal('hide');
+                    $("#choices #carId").val(carId);
+                    $("#choices #tripStartDate").val(tripStartDate);
+                    $("#choices #tripEndDate").val(tripEndDate);
+                    $("#choices").modal('show');
+                }
+                else if(response=="2"){                    
+                    swal({
+                        title: "Oops!!",
+                        text: "Trip is already booked on the given date",
+                        icon: "error",                            
+                        button : true
+                    });
+                }
+                else if(response=="3"){                    
+                    swal({
+                        title: "Oops!!",
+                        text: "Invalid Date Injected, Please input correct date",
+                        icon: "error",                            
+                        button : true
+                    });
+                }
+                else if(response=="4"){
+                    swal({
+                        title: "Oops!!",
+                        text: "You have already booked for another car on the given date",
+                        icon: "error",                            
+                        button : true
+                    });
+                }
+            },
+            error:function(error){
+                console.log(error);
+            }
+        })
+    }
+
+    //Booking process script
+    const proceedBooking=()=>{
+        $("#choices").modal('hide');
+        console.log("Booking process started..")        
+        let carId=$("#choices #carId").val();
+        let tripStartDate=$("#choices #tripStartDate").val();
+        let tripEndDate=$("#choices #tripEndDate").val();                     
+        //Create Order ID..
+        $.ajax({
+            url:'/car-rental-system/app/create-order',
+            data: JSON.stringify({carId:carId, tripStartDate:tripStartDate, tripEndDate:tripEndDate}),
+            contentType:'application/json',
+            type:'POST',
+            dataType:'json',
+            success:function(response){
+                console.log(response)
+                //Success will be triggered when response is success..                
+                if(response.status=='created'){
+                    //Open payment form
+                    let options={
+                        key:'rzp_test_AZSLzVBmowbvZk',
+                        amount:response.amount,
+                        currency:'INR',
+                        name:'Car Rental System',
+                        description:'Book your car safely',                        
+                        order_id:response.id,
+                        handler:function(razorPay){
+                            $.ajax({
+                                url:'/car-rental-system/app/update-order',
+                                data: JSON.stringify({orderId:razorPay.razorpay_order_id, paymentId:razorPay.razorpay_payment_id}),                                
+                                contentType:'application/json',
+                                timeout:100000,
+                                type:'PUT',
+                                dataType:'json',
+                                success:function(response){  
+                                    console.log("Success")
+                                },
+                                error:function(error){                                          
+                                    console.log(response)
+                                    swal({
+                                        title: "Good job!",
+                                        text: "Trip has been booked successfully!!",
+                                        icon: "success",
+                                        button: false
+                                    });
+                                    setTimeout(() => { window.location.href="/car-rental-system/app/fetchTrips"; }, 5000);
+                                }
+                            })                      
+                        },
+                        prefill: {
+                            name: response.name,
+                            email: response.email,
+                            contact: response.contact                          
+                        },
+                        theme: {
+                            color: '#00E6F6'
+                        },
+                        notes: {
+                            address:'Book Trip'
+                        }
+                    };
+                    let razorpayForm=new Razorpay(options);
+                    razorpayForm.on('payment.failed', function (response){
+                        swal({
+                            title: "Oh Snap!",
+                            text: "Looks like payment gateway is busy",
+                            icon: "error",
+                            button: "Okay"
+                        });
+                        console.log(response.error.code);
+                        console.log(response.error.description);
+                        console.log(response.error.source);
+                        console.log(response.error.step);
+                        console.log(response.error.reason);
+                        console.log(response.error.metadata.order_id);
+                        console.log(response.error.metadata.payment_id);                        
+                        setTimeout(() => { window.location.href="/car-rental-system/app/fetchAllCars"; }, 4000);
+                    });                    
+                    razorpayForm.open();
+                }
+            },
+            error:function(error){
+                //Error will be triggered when response is failure..
+                console.log(error);
+            }            
+        })             
+    }
+
+    //Cancellation reason modal
+    $("#upcoming .table .btn-primary").on('click', function(event){
+        event.preventDefault();
+        var href=$(this).attr('href');
+        var orderId = "order_"+href.split("order_")[1];
+        $("#cancellationTrip #orderId").val(orderId);
+        $("#cancellationTrip #reason").val('');
+        $("#cancellationTrip").modal('show');        
+    });
+
+    //Cancellation Trip
+    const cancelTrip=()=>{        
+        let orderId=$("#cancellationTrip #orderId").val();
+        let reason=$("#cancellationTrip #reason").val();
+        if(reason==''){
+            swal({
+                title: "Oops!!",
+                text: "Please provide the reason",
+                icon: "info",                            
+                button : "Okay"
+            });
+            return ;
+        }
+        $("#cancellationTrip").modal('hide');     
+        $.ajax({
+            url: '/car-rental-system/app/cancel-order',
+            data: JSON.stringify({orderId:orderId, reason:reason}),
+            contentType: 'application/json',
+            dataType: 'json',
+            method: 'POST',
+            success:function(response){                
+                console.log("Done");
+            },
+            error:function(response){                
+                if(response.responseText=="done"){
+                    swal({
+                        title: "Trip Cancelled",
+                        text: "Amount will be refunded soon",
+                        icon: "success",
+                        button: false
+                    });
+                }      
+                else if(response.responseText=="error"){
+                    swal({
+                        title: "Oops!!",
+                        text: "Trip can't be cancelled",
+                        icon: "error",                            
+                        button : false
+                    });
+                }                                
+                setTimeout(() => { window.location.href="/car-rental-system/app/fetchTrips"; }, 5000);
+            }            
+        })   
+    }
+
+    //Render Trip page
+    $("#choice").on('change',function(){
+        let choice=document.getElementById("choice").value;
+        //First hiding all displays
+        $("#upcoming").css("display", "none");
+        $("#ongoing").css("display", "none"); 
+        $("#past").css("display", "none");
+        switch(choice){
+            case "1" : $("#upcoming").css("display", "block"); break;
+            case "2" : $("#ongoing").css("display", "block"); break;
+            case "3" : $("#past").css("display", "block"); break;
+        }
+    })    
+</script>

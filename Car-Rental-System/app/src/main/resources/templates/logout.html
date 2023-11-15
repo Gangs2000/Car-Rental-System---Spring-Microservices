@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Logout</title>
+  <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+</head>
+<body style="background-color:ghostwhite">
+<script>
+    swal({
+          title: "Redirecting to Login page",
+          text: "Please wait!!",
+          icon: "success",
+          button: false
+          });
+      setTimeout(() => { window.location.href="/car-rental-system/app/"; }, 4000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html xmlns:th="https://thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">        
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>        
+    <title>Car Rental System</title>
+ </head>
+ <body style="background-color:ghostwhite">
+    <div class="container">
+        <div class="row bg-dark" style="background-color:black; padding:35px; margin-left:-21%; width:142%; color:white">
+            <div class="col-sm">            
+                <center><h5><i class="bi bi-gear-fill"></i>&nbsp;&nbsp;Car Rental System</h5></center>                        
+            </div>
+        </div>
+    </div>
+    <div class="container" style="margin-top:3%">
+        <div class="row">
+            <div class="col-sm">
+                <div class="row">
+                    <div class="col-sm-4"></div>
+                    <!-- Login Page -->
+                    <div class="login-form col-sm-4" style="width:40%; background-color:white; padding:40px; border-radius:10px">
+                        <form action="/car-rental-system/app/login-request" method="post">
+                            <div class="mb-3">
+                                <h3>Login</h3><br>
+                                <div class="col-sm">
+                                    <label class="form-label"><i class="bi bi-envelope-fill"></i>&nbsp;&nbsp;<b>Enter email address :</b></label>                                
+                                    <input type="email" name="emailId" aria-describedby="emailHelp1" placeholder="example@gmail.com" class="form-control" autocomplete="off" required>
+                                    <div id="emailHelp1" class="form-text">We'll never share your email with anyone else.</div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label"><i class="bi bi-shield-lock-fill"></i>&nbsp;&nbsp;<b>Password :</b></label>
+                                <div class="input-group">
+                                    <input type="password" name="password" aria-describedby="forgotPassword" id="loginPassword" placeholder="******" class="form-control" required>
+                                    <span class="input-group-text btn btn-dark" id="toggleTypeLogin"><i class="bi bi-eye-fill"></i></span>
+                                </div>
+                                <a href="#" onclick="resetAndOpenPasswordModal()">Forgot/Update password?</a>
+                            </div><br>
+                            <center><button type="submit" class="btn" style="width:100%; background-color:#306ae6; color:white"><strong><i class="bi bi-arrow-right-square-fill"></i>&nbsp;&nbsp;Login</strong></button></center><br>
+                            <center><p>Don't have an account? <a href="#" onclick="toggleSignup()">Signup</a></p></center>
+                        </form>
+                    </div>
+                    <!-- Signup Page -->
+                    <div class="signup-form col-sm-4" style="display:none;">
+                        <form id="registration">
+                            <div class="mb-3">
+                                <h3>Signup</h3><br>
+                                <div class="col-sm">
+                                    <div class="row">
+                                        <div class="col-sm">
+                                            <label class="form-label"><i class="bi bi-envelope-fill"></i>&nbsp;&nbsp;<b>Enter email address :</b></label>                                
+                                            <input type="email" id="emailId" aria-describedby="emailHelp2" placeholder="example@gmail.com" class="form-control" autocomplete="off" required>
+                                            <div id="emailHelp2" class="form-text">We'll never share your email with anyone else.</div>                                
+                                        </div> 
+                                        <div class="col-sm">
+                                            <label class="form-label"><i class="bi bi-person-circle"></i>&nbsp;&nbsp;<b>Enter UserName :</b></label>                                
+                                            <input type="text" id="userName" placeholder="John Doe" class="form-control" autocomplete="off" required>
+                                        </div> 
+                                    </div>                                
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <label class="form-label"><i class="bi bi-shield-lock-fill"></i>&nbsp;&nbsp;<b>Enter Password :</b></label>
+                                        <div class="input-group">
+                                            <input type="password" id="signUpPassword" placeholder="******" class="form-control" required>
+                                            <span class="input-group-text btn btn-dark" id="toggleTypeSignUp"><i class="bi bi-eye-fill"></i></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm">
+                                        <label class="form-label"><i class="bi bi-telephone-fill"></i>&nbsp;&nbsp;<b>Enter Mobile Number :</b></label>
+                                        <input type="text" id="phoneNo" aria-describedby="phoneNote" placeholder="91XXXXXXXXXX" class="form-control" maxlength="12" autocomplete="off" required>
+                                        <div id="phoneNote" class="form-text">Mobile number with country code</div>                                
+                                    </div>
+                                </div>                            
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label"><i class="bi bi-geo-alt-fill"></i>&nbsp;&nbsp;<b>Enter PostalCode :</b></label>
+                                <div class="row">
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control" id="postalCode" maxlength="6" placeholder="eg:625012" autocomplete="off" required>                                    
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <button type="button" class="btn btn-primary" onclick="fetchGeoLocation()" style="width:100%"><b>Fetch Location</b></button>
+                                    </div>
+                                </div>
+                            </div><br>
+                            <div class="mb-3" id="geoLocation" style="display: none;">
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <label class="form-label"><b>Select Locality : </b></label>
+                                        <select class="form-select" id="places"></select>
+                                    </div>
+                                    <div class="col-sm">
+                                        <label class="form-label"><b>Select District : </b></label>
+                                        <select class="form-select" id="districts"></select>
+                                    </div>
+                                    <div class="col-sm">
+                                        <label class="form-label"><b>Select State : </b></label>
+                                        <select class="form-select" id="state"></select>
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <center><button type="button" onclick="submitRegisterForm()" class="btn" style="width:100%; background-color:#306ae6; color:white"><strong><i class="bi bi-person-plus-fill"></i>&nbsp;&nbsp;Signup</strong></button></center><br>
+                            <center><p>Already have an account? <a href="#" onclick="toggleSignup()">Login</a></p></center>
+                        </form>
+                    </div>
+                    <div class="col-sm-4"></div>                                
+                </div>
+            </div><br><br>
+        </div>
+    </div>
+
+    <!--Forgot/Update Password Model prompt-->    
+    <div class="modal fade" id="passwordRequest" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" style="margin-left:38%;">
+            <div class="modal-content" style="width:100%; padding:5%;">
+                <div class="modal-header">
+                    <h5 class="modal-title">Forgot/Update Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">                    
+                    <div class="mb-3">                                                                               
+                        <label class="form-label"><i class="bi bi-envelope-fill"></i>&nbsp;&nbsp;<b>Email ID : </b></label>
+                        <div class="input-group">
+                            <input type="email" id="emailId" placeholder="johndoe@gmail.com" class="form-control" autocomplete="off" required>
+                            <span class="input-group-text btn btn-success" id="send-otp" style="font-weight:bold; width:25%">Send OTP</span>
+                        </div>                        
+                    </div>
+                    <div class="mb-3" id="showOTPField" style="display:none;">
+                        <label class="form-label"><i class="bi bi-key-fill"></i>&nbsp;&nbsp;<b>Enter OTP : </b></label>                   
+                        <div class="input-group">
+                            <input type="text" id="otp" maxlength="6" placeholder="******" class="form-control" autocomplete="off" required>
+                            <span class="input-group-text btn btn-success" id="verify-otp" style="font-weight:bold; width:25%;">Verify OTP</span>
+                        </div>                        
+                    </div>
+                    <div class="mb-3" id="showPasswordField" style="display:none;">
+                        <label class="form-label"><i class="bi bi-shield-lock-fill"></i>&nbsp;&nbsp;<b>Enter New Password : </b></label>                        
+                        <input type="password" id="newPassword" placeholder="******" class="form-control" autocomplete="off" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm">
+                            <button type="button" id="enablePasswordButton" class="btn btn-primary" style="width:100%; font-weight:bold;" onclick="forgotOrUpdatePassword()" disabled><i class="bi bi-pencil-fill"></i>&nbsp;&nbsp;Update</button>
+                        </div>
+                        <div class="col-sm">
+                            <button type="button" class="btn btn-danger" style="width:100%; font-weight:bold;" onclick="resetAndOpenPasswordModal()"><i class="bi bi-x-circle-fill"></i>&nbsp;&nbsp;Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+
+    //Open Change Password Model box
+    function resetAndOpenPasswordModal(){
+        $("#passwordRequest #emailId").val('');
+        $("#send-otp").removeClass('disabled');
+        $("#passwordRequest #emailId").removeAttr('readonly');
+        $("#showOTPField").css('display', 'none');
+        $("#passwordRequest #otp").val('');        
+        $("#verify-otp").removeClass('disabled');
+        $("#passwordRequest #otp").removeAttr('readonly');
+        $("#passwordRequest #newPassword").val('');
+        $("#showPasswordField").css('display', 'none');        
+        $("#enablePasswordButton").prop('disabled', true);
+        $("#passwordRequest").modal('show');
+    }
+
+    //Send OTP
+    $("#send-otp").on('click', function(){
+        let emailId=$("#passwordRequest #emailId").val();
+        if(emailId==''){
+            swal({
+                title: "Oops!!",
+                text: "Please Enter Email ID",
+                icon: "error",                            
+                button : "Okay"
+            });
+            return ;            
+        }
+        $.ajax({
+            url:'/car-rental-system/app/send-otp',
+            data: JSON.stringify({emailId:emailId, info:'send-otp'}),
+            contentType:'application/json',
+            type:'POST',
+            dataType:'json',                                            
+            success:function(response){                
+                if(response){                   
+                    //Make email prompt read only and disable button                          
+                    $("#send-otp").addClass('disabled');
+                    $("#passwordRequest #emailId").attr('readonly', 'readonly');
+                    //Enable to OTP Prompt field
+                    $("#showOTPField").css('display','block');
+                }
+                else{
+                    swal({
+                        title: "Oops!!",
+                        text: "Email ID is not registered",
+                        icon: "error",                            
+                        button : true
+                    });
+                }
+            },
+            error:function(error){
+                console.log(error);
+                swal({
+                    title: "Oops!!",
+                    text: "Somthing Went Wrong",
+                    icon: "error",                            
+                    button : true
+                });
+            }            
+        })
+    })
+
+    //Verify OTP
+    $("#verify-otp").on('click', function(){
+        let emailId=$("#passwordRequest #emailId").val();
+        let otp=$("#passwordRequest #otp").val();
+        if(emailId=='' || otp==''){
+            swal({
+                title: "Oops!!",
+                text: "Incomplete Form",
+                icon: "error",                            
+                button : "Okay"
+            });
+            return ;
+        }
+        $.ajax({
+            url:'/car-rental-system/app/verify-otp',
+            data: JSON.stringify({emailId:emailId, otp:otp, info:'verify-otp'}),
+            contentType:'application/json',
+            type:'POST',
+            dataType:'json',                                            
+            success:function(response){                
+                if(response){                    
+                    //Make OTP prompt readonly and disable button
+                    $("#verify-otp").addClass('disabled');
+                    $("#passwordRequest #otp").attr('readonly', 'readonly');
+                    //Enable to Password Prompt field and Enable Update Password button                    
+                    $("#showPasswordField").css('display','block');
+                    $("#enablePasswordButton").removeAttr('disabled');
+                }
+                else{
+                    swal({
+                        title: "Invalid OTP!!",
+                        text: "OTP is Invalid, Please try again",
+                        icon: "error",                            
+                        button : true
+                    });
+                }
+            },
+            error:function(error){
+                console.log(error);
+                swal({
+                    title: "Oops!!",
+                    text: "Somthing Went Wrong",
+                    icon: "error",                            
+                    button : true
+                });
+            }            
+        })
+    })
+
+    //Forgot/Update password function
+    function forgotOrUpdatePassword(){
+        let emailId=$("#passwordRequest #emailId").val();
+        let otp=$("#passwordRequest #otp").val();
+        let password=$("#passwordRequest #newPassword").val();
+        if(emailId=='' || otp=='' || password==''){
+            swal({
+                title: "Oops!!",
+                text: "Incomplete Form",
+                icon: "error",                            
+                button : "Okay"
+            });
+            return ;
+        }
+        $.ajax({
+            url: '/car-rental-system/app/forgot-update-password',
+            data: JSON.stringify({emailId:emailId, password:password, info:"forgotOrUpdatePassword"}),
+            type: 'POST',
+            contentType: 'application/json',
+            dataType: 'json',
+            success:function(response){
+                console.log(response);
+                if(response){
+                    swal({
+                        title: "Done!!",
+                        text: "Password has been updated",
+                        icon: "success",
+                        button: true                    
+                    });
+                    $("#passwordRequest").modal('hide');
+                }
+                else{
+                    swal({
+                        title: "Info",
+                        text: "Something went wrong, Please try again",
+                        icon: "info",
+                        button: true
+                    });
+                }
+            },  
+            error:function(error){
+                console.log("Error in API Call");
+                swal({
+                    title: "Oops!!",
+                    text: "Somthing Went Wrong",
+                    icon: "error",                            
+                    button : true
+                });
+            }
+        })
+    }
+
+    //Toggle password type ( Login )
+    const togglePasswordLogin = document.querySelector("#toggleTypeLogin");
+    const passwordLogin = document.querySelector("#loginPassword");
+    togglePasswordLogin.addEventListener("click", function () {  
+        // toggle the type attribute
+        const type = passwordLogin.getAttribute("type") === "password" ? "text" : "password";
+        passwordLogin.setAttribute("type", type);
+        // Toggle the eye icon
+        const eyeIcon = this.querySelector("i");
+        if (type === "password") {
+            eyeIcon.classList.remove("bi-eye-slash-fill");
+            eyeIcon.classList.add("bi-eye-fill");
+        } 
+        else {
+            eyeIcon.classList.remove("bi-eye-fill");
+            eyeIcon.classList.add("bi-eye-slash-fill");
+        }
+    });
+
+    //Toggle password type ( Signup )
+    const togglePasswordSignUp = document.querySelector("#toggleTypeSignUp");
+    const passwordSignUp = document.querySelector("#signUpPassword");
+    togglePasswordSignUp.addEventListener("click", function () {  
+        // toggle the type attribute
+        const type = passwordSignUp.getAttribute("type") === "password" ? "text" : "password";
+        passwordSignUp.setAttribute("type", type);
+        // Toggle the eye icon
+        const eyeIcon = this.querySelector("i");
+        if (type === "password") {
+            eyeIcon.classList.remove("bi-eye-slash-fill");
+            eyeIcon.classList.add("bi-eye-fill");
+        } 
+        else {
+            eyeIcon.classList.remove("bi-eye-fill");
+            eyeIcon.classList.add("bi-eye-slash-fill");
+        }
+    });
+
+    //Fetch Geo Location data
+    const fetchGeoLocation=()=>{         
+        let postalCode=document.getElementById("postalCode").value;
+        if(postalCode.length!=0){
+            console.log("Fetching GeoLocation started..");        
+            $.ajax({                
+                url:'/car-rental-system/app/fetch-geo-location',
+                data: JSON.stringify({postalCode:postalCode, info:'fetchGeoLocation'}),
+                contentType:'application/json',
+                type:'POST',
+                dataType:'json',                                            
+                success:function(response){                                            
+                    if(Object.keys(response).length!=0){
+                        //Clearing all three drop downs before appending new values  
+                        var places=document.getElementById("places");
+                        var districts=document.getElementById("districts");
+                        var states=document.getElementById("state");
+                        places.innerHTML='';                       
+                        districts.innerHTML='';
+                        state.innerHTML='';        
+                        for(var key in response){
+                            let list=response[key];
+                            for(var index in list){
+                                var optionElement = document.createElement('option');
+                                optionElement.value = list[index];
+                                optionElement.textContent = list[index];
+                                switch(key){
+                                    case "places" : places.appendChild(optionElement); break;
+                                    case "districts" : districts.appendChild(optionElement); break;
+                                    case "state" : states.appendChild(optionElement); break;
+                                }                            
+                            }                        
+                        }                       
+                        document.getElementById("geoLocation").style.display="block";                 
+                    }
+                    else{
+                        swal({
+                            title: "Oops!!",
+                            text: "Invalid postal code",
+                            icon: "error",                            
+                            button : true
+                        });
+                    }                        
+                },                
+                error:function(error){
+                //Error will be triggered when response is not success..
+                    console.log(error);
+                    swal({
+                        title: "Oops!!",
+                        text: "Somthing Went Wrong",
+                        icon: "error",                            
+                        button : true
+                    });
+                }
+            })
+        }            
+        else{
+            swal({
+                title: "Oops!!",
+                text: "Enter PostalCode",
+                icon: "error",                            
+                button : "Okay"
+            });
+        }
+    }        
+
+    //Registration validation
+    const submitRegisterForm=()=>{
+        var formElement = document.getElementById('registration');
+        let emailId = formElement.elements['emailId'].value;
+        let userName = formElement.elements['userName'].value;
+        let password = formElement.elements['signUpPassword'].value;
+        let phoneNo = formElement.elements['phoneNo'].value;
+        let postalCode = formElement.elements['postalCode'].value;
+        let locality = formElement.elements['places'].value;
+        let district = formElement.elements['districts'].value;
+        let state = formElement.elements['state'].value;        
+        if(emailId=='' || userName=='' || password=='' || phoneNo=='' || postalCode=='' || locality=='' || district=='' || state==''){
+            swal({
+                title: "Oops!!",
+                text: "Incomplete Form",
+                icon: "error",                            
+                button : "Okay"
+            });
+            return ;
+        }
+        $.ajax({                
+            url:'/car-rental-system/app/registration-request',
+            data: JSON.stringify({emailId:emailId, userName:userName, password:password, phoneNo:phoneNo, postalCode:postalCode, locality:locality, district:district, state:state}),
+            contentType:'application/json',
+            type:'POST',
+            dataType:'json',                                            
+            success:function(response){                   
+                if(response=="1"){
+                    //Error if email ID is already registered
+                    swal({
+                        title: "Oops!!",
+                        text: "Email ID is already registered",
+                        icon: "error",                            
+                        button : true
+                    });
+                }
+                else if(response=="2") {
+                    //Phone Number is not valid
+                    swal({
+                        title: "Oops!!",
+                        text: "Mobile Number is not valid",
+                        icon: "error",                            
+                        button : true
+                    });
+                }
+                else if(response=="3") {
+                    //Email ID is not valid
+                    swal({
+                        title: "Oops!!",
+                        text: "Email ID is not valid",
+                        icon: "error",                            
+                        button : true
+                    });                    
+                }                
+                else if(response=="4"){
+                    swal({
+                        title: "Submitted",
+                        text: "Registration has been done",
+                        icon: "success",
+                        button: true                    
+                    });                    
+                }                
+            },
+            error:function(error){
+                console.log(error);
+            }
+        })
+    }
+
+    //Toggle Login and Signup option
+    function toggleSignup() {
+      var loginForm = document.querySelector(".login-form");
+      var signupForm = document.querySelector(".signup-form");
+      if (signupForm.style.display === "none") {
+        signupForm.style.display = "block";
+        signupForm.style.backgroundColor="white";
+        signupForm.style.padding="40px";
+        signupForm.style.borderRadius="10px";
+        signupForm.style.width="60%";             
+        signupForm.style.marginLeft="20%";
+        loginForm.style.display = "none";        
+      } else {
+        signupForm.style.display = "none";
+        loginForm.style.display = "block";        
+      }
+    }
+</script>
