@@ -28,7 +28,7 @@ public class ThirdPartiesAPIService implements ThirdPartiesAPIInterface {
 
     @Override
     public ResponseEntity<String> validatePhoneNumber(String phoneNumber) {
-        String apiKey="28b7a48c5b874ec4bc620fdbc15ee088";
+        String apiKey=******************************;
         String phoneNumberValidationAPI="https://phonevalidation.abstractapi.com/v1/?api_key="+apiKey+"&phone="+phoneNumber;
         String jsonResponse=restTemplate.getForObject(phoneNumberValidationAPI, String.class);
         String isValid = new JSONObject(jsonResponse).get("valid").toString();
