@@ -46,7 +46,7 @@ public class ReservationDetailsService implements ReservationDetailsInterface {
     @Override
     public String createOrderForBookingCar(ReservationDetails reservationDetails) throws RazorpayException {
         existingCarInventory=carInventoryRepository.findById(reservationDetails.getCarId()).get();
-        razorpay = new RazorpayClient("rzp_test_AZSLzVBmowbvZk", "ecFWgmpgtwxtyXxvkydIuT5N");
+        razorpay = new RazorpayClient("***********************","*************************");
         JSONObject orderRequest = new JSONObject();
         LocalDate tripStartDate=reservationDetails.getTripStartDate();
         LocalDate tripEndDate=reservationDetails.getTripEndDate();
@@ -69,7 +69,7 @@ public class ReservationDetailsService implements ReservationDetailsInterface {
 
     @Override
     public String updateOrderForBookingCar(ReservationDetails reservationDetails) throws RazorpayException {
-        razorpay = new RazorpayClient("rzp_test_AZSLzVBmowbvZk", "ecFWgmpgtwxtyXxvkydIuT5N");
+        razorpay = new RazorpayClient("***********************","*************************");
         Order order=razorpay.orders.fetch(reservationDetails.get_id());
         existingReservationDetails=reservationDetailsRepository.findById(reservationDetails.get_id()).get();
         existingReservationDetails.setNoOfAttempts(order.get("attempts"));
@@ -132,7 +132,7 @@ public class ReservationDetailsService implements ReservationDetailsInterface {
         long getDays=ChronoUnit.DAYS.between(currentDate, tripStartDate);
         //Check condition - Duration between current date and trip start date must be greater than 1 day
         if((!emailId.equals(existingReservationDetails.getRentedBy()) && getDays>1) || getDays>1){
-            razorpay = new RazorpayClient("rzp_test_AZSLzVBmowbvZk", "ecFWgmpgtwxtyXxvkydIuT5N");
+            razorpay = new RazorpayClient("***********************","*************************");
             JSONObject cancelOrderRequest =new JSONObject();
             cancelOrderRequest.put("amount", razorpay.payments.fetch(existingReservationDetails.getPaymentId()).get("amount").toString());      //Setting up refund amount
             cancelOrderRequest.put("speed", "normal");
